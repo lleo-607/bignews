@@ -1,7 +1,7 @@
 /* 沙箱模式 */
 (function (w) {
     // 项目基地址
-    let baseURL = 'http://localhost:8080/avi/v1';
+    let baseURL = 'http://localhost:8080/api/v1';
     
     let BigNew = {
         user_login: baseURL + '/admin/user/login',//用户登录

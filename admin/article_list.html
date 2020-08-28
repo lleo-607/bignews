@@ -72,6 +72,80 @@
             </div>
         </div>
     </div>
+
+    <!-- 模板1：文章分类模板 -->
+    <script id="cat_list" type="text/html">
+        <option value="">所有分类</option>
+        {{ each data v}}
+        <option value="{{ v.id}}">{{ v.name}}</option>
+        {{ /each}}
+    </script>
+
+
+    <!-- 模板2: 文章列表模板 -->
+    <script id="art_list" type="text/html">
+        {{ each data.data v}}
+        <tr>
+            <td>{{ v.title}}</td>
+            <td>{{ v.author}}</td>
+            <td>{{ v.category}}</td>
+            <td class="text-center">{{ v.date}}</td>
+            <td class="text-center">{{ v.state}}</td>
+            <td class="text-center">
+                <a data-id="{{ v.id}}" href="article_edit.html" class="btn btn-default btn-xs btn-edit">编辑</a>
+                <a data-id="{{ v.id}}" href="javascript:void(0);" class="btn btn-danger btn-xs btn-delete">删除</a>
+            </td>
+        </tr>
+        {{ /each}}
+    </script>
+
+    <script src="./libs/http.js"></script>
+    <script>
+        // 入口函数
+        $(function () {
+            // 1. 页面一加载：ajax请求所有的分类列表
+            $.ajax({
+                url: BigNew.category_list,
+                type: 'get',
+                dataType: 'json',
+                success: function (backData) {
+                    console.log(backData);
+                    // 渲染页面
+                    $('#selCategory').html(template('cat_list', backData));
+                }
+            });
+
+            /* 3.筛选按钮点击事件 
+            注意点：筛选按钮在form表单中，需要阻止默认跳转
+            */
+           $('#btnSearch').click(function (e) {
+                // 阻止默认跳转
+                e.preventDefault();
+                // 发送请求
+                $.ajax({
+                    url:BigNew.article_query,
+                    type:'get',
+                    dataType:'json',
+                    data:{
+                        type: $('#selCategory').val(),
+                        state: $('#selStatus').val(),
+                        page: 1,
+                        perpage: 10,
+                    },
+                    success: function(backData){
+                        console.log(backData);
+                        // 模板引擎渲染
+                        $('table>tbody').html(template('art_list',backData));
+                    }
+                });
+           })
+
+
+            // 2. 页面一加载:ajax请求所有的文章列表
+            // 主动触发帅选按钮点击事件： 注意点：要先注册筛选点击事件，然后才可以调用
+            $('#btnSearch').click();
+        })
+    </script>
 </body>
 
 </html>

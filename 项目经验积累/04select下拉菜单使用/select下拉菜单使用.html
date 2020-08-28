@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- 
+        1.下拉菜单select菜单的value值：  只会获取里面的option，不会获取自己的value
+        
+        2.option标签如果同时有value和innerText， 会优先获取value属性值
+
+        3.如果option标签没有value值，则获取的是innerText
+
+    实际开发中：
+        （1）服务器需要的参数： 放在value属性值中 （下拉菜单的value属性优先获取）
+        （2）用户展示的数据： 放在innerText
+     -->
+
+    <select name="" id="sel" value="666">
+        <option>爱生活</option>
+        <option value="">爱美食</option>
+        <option value="">爱运动</option>
+        <option value="">爱学习</option>
+    </select>
+
+    <script>
+        console.log(document.querySelector('#sel').value); //爱生活
+    </script>
+</body>
+</html>

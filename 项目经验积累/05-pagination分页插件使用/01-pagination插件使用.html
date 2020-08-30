@@ -1,0 +1,71 @@
+<!-- 一般插件分为三个流程
+1.导包
+2. 写html结构
+3. js初始化(注册事件,添加一些数据)
+-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 1.导包： pagination差价是基于bootstrap封装的，所以先导入bootstrap -->
+    <script src="./bootstrap/js/jquery-1.12.4.min.js"></script>
+    <script src="./bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <script src="./jquery.twbsPagination.js"></script>
+</head>
+
+<body>
+    <!-- 2.写html结构 -->
+    <ul id="pagination" class="pagination-sm"></ul>
+
+    <div>
+        <button id="btn">筛选按钮</button>
+    </div>
+
+    <script>
+        /* 初始化 */
+        $('#pagination').twbsPagination({
+            totalPages: 35, //总页数
+            startPage: 1, //起始页
+            visiblePages: 7, //可见页
+            first: '首页',
+            prev: '上一页',
+            next: '下一页',
+            last: '尾页',
+            onPageClick: function (event, page) {
+                $('#page-content').text('Page ' + page);
+                console.log('点击页:' + page);
+            }
+        });
+
+
+        $('#btn').click(function () {
+            // 生成1-100随机数,模拟ajax返回新的页数
+            let totalPage = Math.ceil(Math.random() * 100);
+
+            console.log(totalPage);
+            // (1) 先销毁旧分页插件
+            $('#pagination').twbsPagination('destroy');
+            // (2)重新初始化
+            $('#pagination').twbsPagination({
+                totalPages: totalPage, //总页数
+                startPage: 1, //起始页
+                visiblePages: 7, //可见页
+                first: '首页',
+                prev: '上一页',
+                next: '下一页',
+                last: '尾页',
+                onPageClick: function (event, page) {
+                    $('#page-content').text('Page ' + page);
+                    console.log('点击页:' + page);
+                }
+            });
+        })
+    </script>
+</body>
+
+</html>

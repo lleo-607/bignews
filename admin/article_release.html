@@ -14,6 +14,13 @@
     <script src="./libs/jquery-1.12.4.min.js"></script>
     <!-- 模板引擎 -->
     <script src="./libs/template-web.js"></script>
+
+    <!-- 导包： jedate与wangEditor -->
+    <link rel="stylesheet" href="./libs/jedate/css/jeDate-test.css">
+    <link rel="stylesheet" href="./libs/jedate/css/jedate.css">
+
+    <script src="./libs/jedate/js/jedate.js"></script>
+    <script src="./libs/wangEditor.min.js"></script>
 </head>
 
 <body>
@@ -51,11 +58,20 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label">发布时间：</label>
                     <div class="col-sm-4">
+                        <!-- 日期插件 -->
+                        <div class="jeinpbox">
+                            <input type="text" class="jeinput" id="testico" placeholder="YYYY-MM-DD">
+                            <div class="icons jebtns"
+                                onclick="jeDate('#testico',{trigger:false,format: 'YYYY-MM-DD', zIndex:10001})">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
+                        <!-- 编辑器 -->
+                        <div id="editor"></div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -67,6 +83,114 @@
             </form>
         </div>
     </div>
+
+    <!--  文章分类模块  -->
+    <script id="cat_list" type="text/html">
+        {{ each data v}}
+        <option value="{{ v.id}}">{{ v.name}}</option>
+        {{ /each}}
+    </script>
+
+    <script src="./libs/http.js"></script>
+
+    <script>
+        // 入口函数
+        $(function () {
+            console.log(window.location.href);
+
+            /* 0: 完成日期插件和富文本编辑器插件 */
+            jeDate('#testico', {
+                trigger: 'click',
+                format: "YYYY-MM-DD",
+                isShow: true, //是否显示日历面板  
+                multiPane: true, //false :双面板  true:单面板
+                isinitVal: true, //显示默认时间
+                theme: {
+                    bgcolor: "#ffff00",
+                    color: "#ff0000",
+                    pnColor: "#ee2388"
+                },
+                festival: true, //是否显示农历
+                zIndex: 10002
+            });
+
+            /* 注意点： 发现问题  编辑器插件会遮盖日期插件
+                分析：编辑器插件层级大于日期插件
+                解决方案：设置日期插件层级>10000
+            */
+            let E = window.wangEditor;
+            let editor = new E('#editor');
+            // 或者 var editor = new E( document.getElementById('editor') )
+            editor.create();
+
+            /* 1. 先加载所有的文章分类列表 */
+            $.ajax({
+                url: BigNew.category_list,
+                type: 'get',
+                dataType: 'json',
+                success: function (backData) {
+                    console.log(backData);
+                    // 模板引擎渲染页面
+                    $('.category').html(template('cat_list', backData));
+                }
+            });
+
+            /* 2. 文件预览 */
+            //1.给file表单元素注册onchange事件
+            $('#inputCover').change(function () {
+                //1.2 获取用户选择的图片
+                let file = this.files[0];
+                //1.3 将文件转为src路径
+                let url = URL.createObjectURL(file);
+                //1.4 将url路径赋值给img标签的src
+                $('.article_cover').attr('src', url);
+            });
+
+            /* 3. 文件提交: 已发布 和草稿 
+            注意点: 点击修改和存为草稿都可以修改参数,只是state参数不同
+            解决方案:
+            */
+            $('.btn-release,.btn-draft').on('click', function (e) {
+                //3.1 禁用表单默认提交事件
+                e.preventDefault();
+                //3.2 创建FormData对象：参数是表单dom对象
+                let fd = new FormData($('form')[0])
+                /*注意点 
+                a. formdata默认只能获取有name属性的表单值
+                b. 如果formdata获取参数 < 接口文档参数 则可以使用append()手动追加
+                c. append() 如果追加了重复参数，fd不会覆盖，而是全部发给服务器
+                */
+                fd.append('date', $('#testico').val());
+                fd.append('content', editor.txt.html());
+                fd.append('state', $(this).text() == '发布' ? '已发布' : '草稿');
+
+                $.ajax({
+                    url: BigNew.article_publish,
+                    type: 'post',
+                    dataType: 'json',
+                    data: fd,
+                    contentType: false,
+                    processData: false,
+                    success: function (backData) {
+                        console.log(backData);
+                        if(backData.code == 200){
+                            alert('发布成功');
+                            //回退上一级页面：文章列表
+                            // window.history.back();
+                            window.location.href = './article_list.html';
+
+                            //左侧文章列表页高亮
+                            $('.level02>li:eq(0)',window.parent.document).click();
+                        }
+                        
+
+                    }
+                });
+            });
+
+
+        })
+    </script>
 </body>
 
 </html>

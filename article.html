@@ -205,9 +205,119 @@
         <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
 
+
+    <!-- 文章详细信息模板 -->
+    <script id="article" type="text/html">
+        <h3 class="article_title">{{ data.title }}</h3>
+        <div class="article_info">{{ data.author }} 发布于 {{ data.date }}&nbsp;&nbsp;&nbsp;分类:
+            {{ data.category }}&nbsp;&nbsp;&nbsp;阅读:
+            ({{ data.read }})&nbsp;&nbsp;&nbsp;评论: ({{ data.comments }})</div>
+        <div class="article_con">
+            {{@ data.content }}
+        </div>
+        <div class="article_links">
+            {{ if data.prev }}
+            上一篇： <a href="./article.html?id={{ data.prev.id }}">{{ data.prev.title }}</a><br>
+            {{ /if }}
+
+            {{ if data.next }}
+            下一篇： <a href="./article.html?id={{ data.next.id }}">{{ data.next.title }}</a>
+            {{ /if }}
+        </div>
+    </script>
+
+
+    <!-- 评论列表模板 -->
+    <script id="com_list" type="text/html">
+        {{ each data v }}
+        <div class="comment_detail_list">
+            <div class="person_pic fl">{{ v.author[0] }}</div>
+            <div class="name_time fl"><b>{{ v.author }}</b><span>{{ v.date }}</span></div>
+            <div class="comment_text fl">
+                {{ v.content }}
+            </div>
+        </div>
+        {{ /each }}
+    </script>
+
+
+
+
     <!-- 引入模板引擎js文件 -->
     <script src="./js/template-web.js"></script>
     <script src="./js/jquery-1.12.4.min.js"></script>
+
+
+
+    <script>
+        /* 1.获取从其他页面传递过来的参数：文章id */
+        let id = window.location.href.split('=')[1];
+        console.log(id);
+
+
+        /* 2.请求文章详细信息 */
+        $.ajax({
+            url: 'http://localhost:8080/api/v1/index/article',
+            type: 'get',
+            dataType: 'json',
+            data: {
+                id: id
+            },
+            success: function (backData) {
+                console.log(backData);
+                //模板引擎渲染
+                $('.article_info').html(template('article', backData));
+            }
+        });
+
+        /* 3.ajax加载评论列表 */
+        $.ajax({
+            url: 'http://localhost:8080/api/v1/index/get_comment',
+            type: 'get',
+            dataType: 'json',
+            data: {
+                articleId: id
+            },
+            success: function (backData) {
+                console.log(backData);
+                //模板引擎渲染
+                $('.comment_list_con').html(template('com_list', backData));
+
+                $('.comment_count').text(backData.data.length + '条评论');
+            }
+        });
+
+        /* 4.发表评论
+        注意点：表单按钮需要阻止默认跳转
+        */
+        $('.comment_sub').click(function (e) {
+            //(1)阻止默认跳转
+            e.preventDefault();
+            //(2)非空判断
+            if ($('.comment_name').val().length == 0 || $('.comment_input').val().length == 0) {
+                alert('说点什么吧!');
+                return;
+            };
+            //(3)ajax发送请求
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/post_comment',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    author: $('.comment_name').val(),
+                    content: $('.comment_input').val(),
+                    articleId: id
+                },
+                success: function (backData) {
+                    if (backData.code == 201) {
+                        alert('评论成功，请耐心等待审核');
+                        //文本清空
+                        $('.comment_form')[0].reset();
+                    }
+                }
+            });
+        })
+    </script>
 
 </body>
 

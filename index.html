@@ -296,7 +296,7 @@
     </script>
 
     <!-- 模板6: 焦点关注 -->
-    <script id="guanZhu_list" type="text/html">
+    <script id="guanzhu_list" type="text/html">
         {{ each data v}}
         <li><a href="#">{{ v.intro }}</a></li>
         {{ /each}}
@@ -367,7 +367,7 @@
             dataType: 'json',
             success: function (backData) {
                 console.log(backData);
-                $('.guanzhu_list').html(template('guanZhu_list', backData));
+                $('.guanzhu_list').html(template('guanzhu_list', backData));
             }
         });
     </script>

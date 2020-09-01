@@ -229,6 +229,10 @@
         <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
 
+
+    
+    <!-- 导包template -->
+    <script src="./js/template-web.js"></script>
     <!-- 文章列表模板 -->
     <script id="art_list" type="text/html">
         {{ each data.data v }}
@@ -249,32 +253,32 @@
 
 
 
-    <!-- 导包template -->
-    <script src="./js/template-web.js"></script>
-
 
     <script>
-        $('.search_btn').click(function () {
-            $.ajax({
-                url: 'http://localhost:8080/api/v1/index/search',
-                type: 'get',
-                dataType: 'json',
-                data: {
-                    key: $('.search_txt').val(),
-                    page: 1,
-                    perpage: 10
-                },
-                success: function (backData) {
-                    console.log(backData);
-                    //模板引擎渲染
-                    $('.news').html(template('art_list', backData));
-                }
+        // 入口函数
+        $(function () {
+            $('.search_btn').click(function () {
+                $.ajax({
+                    url: 'http://localhost:8080/api/v1/index/search',
+                    type: 'get',
+                    dataType: 'json',
+                    data: {
+                        key: $('.search_txt').val(),
+                        page: 1,
+                        perpage: 10
+                    },
+                    success: function (backData) {
+                        console.log(backData);
+                        //模板引擎渲染
+                        $('.news').html(template('art_list', backData));
+                    }
+                });
             });
-        });
 
 
-        //1.页面一加载：ajax请求所有的数据
-        $('.search_btn').click();
+            //1.页面一加载：ajax请求所有的数据
+            $('.search_btn').click();
+        })
     </script>
 </body>
 
